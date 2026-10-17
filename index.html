@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>六爻卜卦系統</title>
+  <style>
+    :root { color-scheme: light; --ink:#352a20; --muted:#796d5e; --gold:#a57937; --line:#ded0b8; --paper:#fffaf0; --accent:#714e26; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:linear-gradient(155deg,#f2eadb,#faf6ed 55%,#eee1c8); color:var(--ink); font-family: "Noto Serif TC","Microsoft JhengHei",serif; line-height:1.6; }
+    .container { max-width:900px; margin:28px auto; padding:clamp(18px,4vw,38px); background:rgba(255,252,246,.96); border:1px solid #e5d6ba; border-radius:22px; box-shadow:0 14px 38px #5e452018; }
+    h1 { text-align:center; font-size:clamp(1.7rem,4vw,2.3rem); margin:0 0 6px; letter-spacing:.12em; }
+    .subtitle { text-align:center; margin:0 0 26px; color:var(--muted); font-size:.95rem; }
+    label { display:block; font-weight:bold; margin-bottom:7px; }
+    textarea { display:block; width:100%; min-height:90px; resize:vertical; padding:12px 14px; border:1px solid var(--line); border-radius:12px; font:inherit; background:#fffefa; color:var(--ink); }
+    textarea:focus-visible,button:focus-visible { outline:3px solid #c29e62; outline-offset:3px; }
+    .hint { color:var(--muted); font-size:.89rem; margin:7px 0 0; }
+    .stage { text-align:center; margin-top:24px; padding:20px 14px; border:1px solid var(--line); border-radius:18px; background:#f9f1e3; }
+    .stage-title { font-size:1.14rem; font-weight:bold; margin:0 0 8px; }
+    .shell-button { display:block; margin:12px auto 6px; padding:0; border:0; cursor:pointer; background:transparent; border-radius:16px; }
+    .shell-button img { display:block; width:min(100%,300px); margin:auto; border-radius:15px; box-shadow:0 5px 15px #4b392621; }
+    .shell-button[disabled] { cursor:default; opacity:.82; }
+    .shell-button.shaking img { animation:shake .16s ease-in-out infinite alternate; }
+    @keyframes shake { from { transform:translateX(-7px) rotate(-7deg) } to { transform:translateX(7px) rotate(7deg) } }
+    @media (prefers-reduced-motion:reduce) { .shell-button.shaking img { animation:none; } .coin-result { animation:none!important; } }
+    .status { min-height:1.8em; font-weight:600; color:var(--accent); margin:8px 0; }
+    .coin-result { display:none; margin:14px auto; max-width:370px; width:100%; border-radius:15px; animation:appear .4s ease-out; }
+    .coin-result.visible { display:block; }
+    @keyframes appear { from { opacity:0; transform:translateY(-15px) scale(.97) } to { opacity:1; transform:none } }
+    .buttons { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+    .btn { font:inherit; padding:9px 20px; background:#70502d; color:white; border:0; border-radius:10px; cursor:pointer; }
+    .btn:hover:not(:disabled) { background:#50361d; }
+    .btn.secondary { background:#eee1cc; border:1px solid #d7be99; color:#4e3923; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .section-title { margin:30px 0 12px; font-size:1.18rem; border-bottom:1px solid var(--line); padding-bottom:8px; }
+    .history { display:grid; gap:9px; }
+    .history-row { display:grid; grid-template-columns:70px 1fr auto; align-items:center; gap:10px; padding:10px 14px; border:1px solid var(--line); background:white; border-radius:12px; }
+    .history-row .detail { color:var(--muted); font-size:.88rem; }
+    .yao-line { font-family:system-ui,sans-serif; font-size:1.55rem; line-height:1; white-space:nowrap; color:#815a24; font-weight:bold; }
+    .moving { color:#a13527; }
+    .empty { padding:15px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:12px; }
+    .results { display:none; margin-top:25px; }
+    .results.visible { display:block; }
+    .hex-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+    .hex-card { border:1px solid var(--line); border-radius:15px; background:#fffdf8; padding:18px 10px; text-align:center; }
+    .hex-card h3 { margin:0 0 8px; }
+    .hex-name { margin:10px 0 2px; font-weight:bold; font-size:1.08rem; }
+    .hex-code { color:var(--muted); font-size:.85rem; font-family:monospace; }
+    .hex-lines { display:flex; flex-direction:column; gap:10px; align-items:center; padding:10px 0; }
+    .hex-line { display:flex; justify-content:center; gap:12px; width:145px; height:13px; }
+    .hex-line span { height:13px; background:#8a632e; border-radius:2px; }
+    .hex-line.yang span { width:145px; }
+    .hex-line.yin span { width:66px; }
+    .hex-line.changed span { background:#b7533c; }
+    .summary { margin-top:14px; padding:14px; border-radius:12px; background:#f7eedf; }
+    .summary p { margin:4px 0; overflow-wrap:anywhere; }
+    .note { font-size:.85rem; color:var(--muted); margin-top:19px; }
+    @media(max-width:540px) { .container { margin:0; border-radius:0; } .history-row { grid-template-columns:54px 1fr auto; padding:9px; gap:6px; } .history-row .detail { font-size:.78rem; } .hex-grid { gap:8px; } .hex-card { padding:12px 5px; } .hex-line { width:112px; height:10px; gap:8px; } .hex-line span { height:10px; } .hex-line.yang span { width:112px; } .hex-line.yin span { width:52px; } }
+  </style>
+</head>
+<body>
+<main class="container">
+  <h1>六爻卜卦系統</h1>
+  <p class="subtitle">三枚銅錢・六次起爻・本卦與變卦</p>
+
+  <label for="question">想問的事情</label>
+  <textarea id="question" placeholder="把想問的事情輸入，並在點選圖片卜卦時，內心虔誠的念著問題。"></textarea>
+  <p class="hint">請先想好問題，再點擊龜殼。開始後問題將暫時鎖定，直到重新起卦。點選圖片卜卦時，內心虔誠的念著問題。</p>
+
+  <section class="stage" aria-label="擲銅錢起卦區">
+    <p class="stage-title" id="stageTitle">準備起卦</p>
+    <button class="shell-button" id="shellButton" type="button" aria-label="點擊龜殼擲出下一爻">
+      <img src="image/shell.webp" alt="手持龜殼的示意圖" id="shellImage">
+    </button>
+    <p class="status" id="status" role="status" aria-live="polite">點擊龜殼，開始擲初爻（共六次）</p>
+    <img class="coin-result" id="coinImage" alt="本次三枚銅錢結果">
+    <div class="buttons">
+      <button class="btn secondary" id="resetButton" type="button">重新起卦</button>
+    </div>
+  </section>
+
+  <h2 class="section-title">六爻紀錄（上爻在上、初爻在下）</h2>
+  <div class="history" id="history"><div class="empty">尚未開始起卦</div></div>
+
+  <section class="results" id="results">
+    <h2 class="section-title">卜卦結果</h2>
+    <div class="hex-grid">
+      <article class="hex-card">
+        <h3>本卦</h3>
+        <div class="hex-lines" id="baseLines" aria-label="本卦六爻"></div>
+        <p class="hex-name" id="baseName"></p>
+        <div class="hex-code" id="baseBinary"></div>
+      </article>
+      <article class="hex-card">
+        <h3>變卦</h3>
+        <div class="hex-lines" id="changedLines" aria-label="變卦六爻"></div>
+        <p class="hex-name" id="changedName"></p>
+        <div class="hex-code" id="changedBinary"></div>
+      </article>
+    </div>
+    <div class="summary">
+      <p id="questionSummary"></p>
+      <p id="baseHexagramSummary"></p>
+      <p id="changedHexagramSummary"></p>
+      <p id="movingSummary"></p>
+      <p id="meaningSummary"></p>
+    </div>
+  </section>
+  <p class="note">本工具模擬傳統三枚銅錢起卦。銅錢圖片是對應結果的示意；解讀僅供文化體驗與個人反思，不應取代重要決策所需的專業判斷。</p>
+</main>
+<script>
+"use strict";
+
+// 二進位以「上爻到初爻」排列：1=陽、0=陰；前三碼為上卦，後三碼為下卦。
+const trigrams = {
+  "111": ["☰", "乾", "天"], "110": ["☱", "兌", "澤"],
+  "101": ["☲", "離", "火"], "100": ["☳", "震", "雷"],
+  "011": ["☴", "巽", "風"], "010": ["☵", "坎", "水"],
+  "001": ["☶", "艮", "山"], "000": ["☷", "坤", "地"]
+};
+
+// 文王六十四卦：每項 [二進位, 卦名, 傳統順序]
+const hexagramEntries = [
+  ["111111","乾",1], ["000000","坤",2], ["010100","屯",3], ["001010","蒙",4],
+  ["010111","需",5], ["111010","訟",6], ["000010","師",7], ["010000","比",8],
+  ["011111","小畜",9], ["111110","履",10], ["000111","泰",11], ["111000","否",12],
+  ["111101","同人",13], ["101111","大有",14], ["000001","謙",15], ["100000","豫",16],
+  ["110100","隨",17], ["001011","蠱",18], ["000110","臨",19], ["011000","觀",20],
+  ["101100","噬嗑",21], ["001101","賁",22], ["001000","剝",23], ["000100","復",24],
+  ["111100","無妄",25], ["001111","大畜",26], ["001100","頤",27], ["110011","大過",28],
+  ["010010","坎",29], ["101101","離",30], ["110001","咸",31], ["100011","恆",32],
+  ["111001","遯",33], ["100111","大壯",34], ["101000","晉",35], ["000101","明夷",36],
+  ["011101","家人",37], ["101110","睽",38], ["010001","蹇",39], ["100010","解",40],
+  ["001110","損",41], ["011100","益",42], ["110111","夬",43], ["111011","姤",44],
+  ["110000","萃",45], ["000011","升",46], ["110010","困",47], ["010011","井",48],
+  ["110101","革",49], ["101011","鼎",50], ["100100","震",51], ["001001","艮",52],
+  ["011001","漸",53], ["100110","歸妹",54], ["100101","豐",55], ["101001","旅",56],
+  ["011011","巽",57], ["110110","兌",58], ["011010","渙",59], ["010110","節",60],
+  ["011110","中孚",61], ["100001","小過",62], ["010101","既濟",63], ["101010","未濟",64]
+];
+
+const hexagramMap = Object.fromEntries(hexagramEntries.map(([bits,name,number]) => {
+  const top = trigrams[bits.slice(0,3)];
+  const bottom = trigrams[bits.slice(3)];
+  const fullName = top[2] === bottom[2] ? `${top[1]}為${top[2]}` : `${top[2]}${bottom[2]}${name}`;
+  return [bits, { number, name, fullName, symbols: top[0] + bottom[0] }];
+}));
+
+const coinImages = {
+  "正正反":"image/zzf.webp", "正反正":"image/zfz.webp", "反正正":"image/fzz.webp",
+  "正正正":"image/zzz.webp", "反反正":"image/ffz.webp", "反正反":"image/fzf.webp",
+  "正反反":"image/zff.webp", "反反反":"image/fff.webp"
+};
+const yaoNames = ["初爻","二爻","三爻","四爻","五爻","上爻"];
+const yaoKinds = {6:"老陰",7:"少陽",8:"少陰",9:"老陽"};
+let lines = [];                 // 第一筆是初爻，最後一筆是上爻
+let tossing = false;
+let sessionQuestion = "";
+let sessionId = 0;             // 防止重新起卦時舊動畫回寫畫面
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// 使用瀏覽器安全亂數；每枚硬幣正反各半。
+function coinSide() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    const value = new Uint32Array(1);
+    const limit = 0x100000000 - (0x100000000 % 2);
+    do { window.crypto.getRandomValues(value); } while (value[0] >= limit);
+    return (value[0] % 2) === 0 ? "正" : "反";
+  }
+  return Math.random() < 0.5 ? "正" : "反";
+}
+
+function createLine() {
+  const coins = Array.from({length:3}, coinSide);
+  const sum = coins.reduce((acc,side) => acc + (side === "正" ? 3 : 2), 0);
+  return {
+    coins: coins.join(""), sum, kind: yaoKinds[sum],
+    original: (sum === 7 || sum === 9) ? 1 : 0,
+    changed: (sum === 6) ? 1 : (sum === 9) ? 0 : (sum === 7 ? 1 : 0),
+    moving: sum === 6 || sum === 9
+  };
+}
+
+function renderHistory() {
+  const history = $("history");
+  history.replaceChildren();
+  if (!lines.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "尚未開始起卦";
+    history.appendChild(empty);
+    return;
+  }
+  // 由上往下顯示
+  for (let i=lines.length-1; i>=0; i--) {
+    const l = lines[i];
+    const row = document.createElement("div");
+    row.className = "history-row";
+    const position = document.createElement("strong");
+    position.textContent = yaoNames[i];
+    const detail = document.createElement("div");
+    detail.className = "detail";
+    detail.textContent = `${l.coins}（${l.kind}）${l.moving ? "・動爻" : ""}`;
+    const symbol = document.createElement("div");
+    symbol.className = "yao-line" + (l.moving ? " moving" : "");
+    symbol.textContent = (l.original ? "⚊" : "⚋") + (l.moving ? (l.sum === 9 ? " ○" : " ×") : "");
+    row.append(position,detail,symbol);
+    history.appendChild(row);
+  }
+}
+
+function renderHexLines(target,bits,movingIndices) {
+  const container = $(target);
+  container.replaceChildren();
+  [...bits].forEach((bit,index) => {
+    const line = document.createElement("div");
+    line.className = `hex-line ${bit === "1" ? "yang" : "yin"}` + (movingIndices.includes(5-index) ? " changed" : "");
+    line.setAttribute("aria-label", `${6-index}爻${bit === "1" ? "陽" : "陰"}${movingIndices.includes(5-index) ? "，動爻" : ""}`);
+    for (let n=0;n<(bit === "1" ? 1 : 2);n++) line.appendChild(document.createElement("span"));
+    container.appendChild(line);
+  });
+}
+
+function renderResult() {
+  const base = [...lines].reverse().map(l=>l.original).join("");
+  const changed = [...lines].reverse().map(l=>l.changed).join("");
+  const movingIndices = lines.flatMap((l,i) => l.moving ? [i] : []);
+  const baseInfo = hexagramMap[base];
+  const changedInfo = hexagramMap[changed];
+  if (!baseInfo || !changedInfo) {
+    $("status").textContent = "卦象對照失敗，請檢查資料。";
+    return;
+  }
+  renderHexLines("baseLines",base,movingIndices);
+  renderHexLines("changedLines",changed,movingIndices);
+  $("baseName").textContent = `第 ${baseInfo.number} 卦｜${baseInfo.symbols} ${baseInfo.fullName}`;
+  $("changedName").textContent = `第 ${changedInfo.number} 卦｜${changedInfo.symbols} ${changedInfo.fullName}`;
+  $("questionSummary").textContent = `所問之事：${sessionQuestion || "（未填寫）"}`;
+  $("baseHexagramSummary").textContent = `本卦的卦象：第 ${baseInfo.number} 卦｜${baseInfo.symbols} ${baseInfo.fullName}`;
+  $("changedHexagramSummary").textContent = `變卦的卦象：第 ${changedInfo.number} 卦｜${changedInfo.symbols} ${changedInfo.fullName}`;
+  $("movingSummary").textContent = movingIndices.length
+    ? `動爻：${movingIndices.map(i=>yaoNames[i]).join("、")}`
+    : "動爻：無（本卦與變卦相同）";
+  $("meaningSummary").textContent = "紅色爻線代表動爻；老陽由陽變陰，老陰由陰變陽。";
+  $("results").classList.add("visible");
+}
+
+async function tossNext() {
+  if (tossing || lines.length === 6) return;
+  const id = sessionId;
+  tossing = true;
+  $("shellButton").disabled = true;
+  $("shellButton").classList.add("shaking");
+  $("coinImage").classList.remove("visible");
+  if (lines.length === 0) {
+    sessionQuestion = $("question").value.trim();
+    $("question").disabled = true;
+  }
+  const currentIndex = lines.length;
+  $("stageTitle").textContent = `正在擲${yaoNames[currentIndex]}`;
+  $("status").textContent = "搖動龜殼中……";
+  try {
+    await wait(850);
+    if (sessionId !== id) return;
+    const line = createLine();
+    lines.push(line);
+    $("shellButton").classList.remove("shaking");
+    $("coinImage").src = coinImages[line.coins];
+    $("coinImage").alt = `三枚銅錢：${line.coins}`;
+    $("coinImage").classList.add("visible");
+    renderHistory();
+    $("status").textContent = `${yaoNames[currentIndex]}：${line.coins} → ${line.kind}${line.moving ? "（動爻）" : ""}`;
+    if (lines.length === 6) {
+      $("stageTitle").textContent = "六爻完成";
+      $("status").textContent += "。已完成起卦，請查看下方卦象。";
+      renderResult();
+    } else {
+      $("stageTitle").textContent = `已完成 ${lines.length} / 6 爻`;
+      $("status").textContent += `。請再次點擊龜殼，擲${yaoNames[lines.length]}。`;
+    }
+  } finally {
+    if (sessionId === id) {
+      tossing = false;
+      $("shellButton").classList.remove("shaking");
+      $("shellButton").disabled = lines.length === 6;
+    }
+  }
+}
+
+function resetToss() {
+  sessionId++;
+  lines = [];
+  tossing = false;
+  sessionQuestion = "";
+  $("question").disabled = false;
+  $("question").value = "";
+  $("shellButton").disabled = false;
+  $("shellButton").classList.remove("shaking");
+  $("coinImage").classList.remove("visible");
+  $("coinImage").removeAttribute("src");
+  $("results").classList.remove("visible");
+  $("stageTitle").textContent = "準備起卦";
+  $("status").textContent = "點擊龜殼，開始擲初爻（共六次）";
+  renderHistory();
+}
+
+// 載入時先檢查卦表是否完整。
+(function validateHexagrams() {
+  const keys = Object.keys(hexagramMap);
+  const expected = Array.from({length:64},(_,i)=>i.toString(2).padStart(6,"0"));
+  if (keys.length !== 64 || expected.some(k=>!(k in hexagramMap))) {
+    console.error("六十四卦資料不完整或重複！", keys.length);
+  }
+})();
+$("shellButton").addEventListener("click",tossNext);
+$("resetButton").addEventListener("click",resetToss);
+</script>
+</body>
+</html>
