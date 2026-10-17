@@ -35,14 +35,6 @@
 
 ![六爻紀錄、本卦火風鼎與變卦山風蠱](docs/screenshots/result.png)
 
-<details>
-<summary>查看另一組動爻範例：水雷屯 → 水火既濟</summary>
-
-![初爻變動的卦象與摘要示例](docs/screenshots/moving-line-detail.png)
-
-此圖來自較早的畫面紀錄，摘要欄位與目前版本略有差異。
-
-</details>
 
 ## 技術設計與面試討論重點
 
