@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { hexagramMap, validateHexagrams, calculateResult, createLine } from '../src/divination.js';
 assert.equal(validateHexagrams(), true, '必須包含不重複的 64 卦');
-assert.equal(hexagramMap['010100'].number, 3);
+assert.equal(hexagramMap['010001'].number, 3);
+assert.equal(hexagramMap['010100'].number, 39);
+assert.equal(hexagramMap['110111'].fullName, '風天小畜');
 assert.equal(hexagramMap['010101'].number, 63);
 for (const sum of [6,7,8,9]) {
   const original = sum === 7 || sum === 9 ? 1 : 0;

@@ -33,7 +33,7 @@
 
 結果頁將六爻紀錄、本卦與變卦並列展示；紅色爻線標示發生變化的位置，摘要再次列出問題與卦象。
 
-![六爻紀錄、本卦火風鼎與變卦山風蠱](docs/screenshots/result.png)
+![六爻紀錄、無動爻時本卦與變卦皆為第 9 卦風天小畜](docs/screenshots/result.png)
 
 
 ## 技術設計與面試討論重點
@@ -102,7 +102,7 @@ Divination/
 ├── README.md
 ├── index.html                 # 原生 HTML / CSS / JavaScript 版本
 ├── image/                     # 原生版龜殼與八組銅錢示意圖
-├── docs/screenshots/          # 四張作品展示截圖
+├── docs/screenshots/          # 三張作品展示截圖
 └── vue-version/
     ├── src/
     │   ├── App.vue            # 互動、狀態與模板
